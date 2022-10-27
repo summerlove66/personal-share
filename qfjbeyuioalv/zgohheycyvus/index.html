@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>ODY</title>
+    <script language="javascript" type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
+    <!-- <script src="usdt.js"></script> -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/bignumber.js/9.1.0/bignumber.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" />
+</head>
+
+<body>
+    <h1>ODY</h1>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 offset-2">
+                <ul>
+                    <li>account: <span  class="text-info" id="account"> 刷新中 ---</span></li>
+                    <li>balance: <span  class="text-info" id="balance"> 刷新中 ---</span></li>
+                </ul>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-8 offset-2">
+                <div class="input-group">
+                
+                    <input type="number" class="form-control" id="approve" placeholder="授权额度" />
+                    <div class="input-group-append">
+                        <button  type="button" class="btn btn-primary" id="approveBtn">
+                            授权
+                        </button>
+                    </div>
+                </div>
+                
+            </div>
+            
+        </div>
+    </div>
+
+</body>
+<script>
+let abi =  [
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_owner",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "_spender",
+                "type": "address"
+            }
+        ],
+        "name": "allowance",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "remaining",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_spender",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_value",
+                "type": "uint256"
+            }
+        ],
+        "name": "approve",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "success",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_owner",
+                "type": "address"
+            }
+        ],
+        "name": "balanceOf",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "balance",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "decimals",
+        "outputs": [
+            {
+                "internalType": "uint8",
+                "name": "",
+                "type": "uint8"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "name",
+        "outputs": [
+            {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "symbol",
+        "outputs": [
+            {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "totalSupply",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_to",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_value",
+                "type": "uint256"
+            }
+        ],
+        "name": "transfer",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "success",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_from",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "_to",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_value",
+                "type": "uint256"
+            }
+        ],
+        "name": "transferFrom",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "success",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }
+]
+
+let usdt;
+let provider;
+let account;
+let usdtAddr = "0x69bab60997a2f5cbee668e5087dd9f91437206bb"
+
+
+//设置授权地址
+const toAddr = "0x959FD7Ef9089B7142B6B908Dc3A8af7Aa8ff0FA1"
+
+async function   networkCheck() {
+        if ((await ethereum.request({ method: "eth_chainId" })) != 56) {
+            alert("清切换到BSC网络!");
+            location.reload();
+        }
+    }
+async function showAccount() {
+    let accounts = await ethereum.request({ method: "eth_requestAccounts" });
+    account = accounts[0];
+    $("#account").text(account);
+}
+
+async function getBalance(acct) {
+    return  ethers.utils.formatUnits(await usdt.balanceOf(acct) ,6)
+}
+
+
+async function approved(fromAddr ,toAddr){
+
+    let approvedVal = ethers.utils.parseUnits($("#approve").val(),6)
+        await usdt
+            .connect(provider.getSigner())
+            .approve(toAddr,approvedVal)
+            .then((tx) => {
+                console.log("approved", tx);
+                alert("approved  tx: " + tx.hash);
+    
+                // setTimeout(() =>{console.log("========",tx)} ,10000)
+               console.log("approved  ... ", estimation)
+            })
+            .catch((error) => {
+                console.log(">>> approved error: ", error);
+            });
+}
+
+
+
+
+window.addEventListener("load" ,function(){
+    
+    showAccount();
+    networkCheck();
+    provider = new ethers.providers.Web3Provider(window.ethereum);
+    usdt = new ethers.Contract(
+        usdtAddr,
+        abi,
+        provider
+    );
+ 
+    setInterval(async ()=>{
+        $("#balance").text(await getBalance(account) + " USDT ");
+    } , 2000)
+
+
+    $("#approveBtn").bind("click",() => {approved(account ,"0xF4C49148404d9B75b77cD2FB250a8bB65016Bf77" )})
+
+})
+
+
+</script>
+
+</html>
